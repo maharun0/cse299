@@ -30,6 +30,10 @@ balance between performance, flexibility, and security.
 
 This chatbot enhances document-based search with AI-driven conversation, accuracy, and privacy.  
 
+---
+## Rag Pipeline
+![Rag Pipeline](./data/rag_pipeline.png)
+
 ## Contributors
 
 - **Maharun Afroz** 
