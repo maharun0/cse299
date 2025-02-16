@@ -32,7 +32,7 @@ This chatbot enhances document-based search with AI-driven conversation, accurac
 
 ---
 ## Rag Pipeline
-![Rag Pipeline](./data/rag_pipeline.png)
+![Rag Pipeline](./Reports%20and%20Proposals/data/rag_pipeline.png)
 
 ## Contributors
 
