@@ -9,3 +9,7 @@ def loadDocument(file_path) {
     docs = loader.load()
     return docs
 }
+
+# Test purpose
+if __name__ == "__main__":
+    loadPDF("")
