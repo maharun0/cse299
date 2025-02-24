@@ -4,12 +4,15 @@
 
 from langchain_community.document_loaders import PyPDFLoader
 
-def loadDocument(file_path) {
-    loader = PyPDFLoader(file_path)
-    docs = loader.load()
-    return docs
-}
+def loadDocument(file_path):
+    try:
+        loader = PyPDFLoader(file_path)
+        docs = loader.load()
+        print("Document loaded successfully from file.")
+        return docs
+    except Exception as e:
+        print(f"Error loading document from file: {e}")
 
-# Test purpose
-if __name__ == "__main__":
-    loadPDF("")
+# Combine content of all docs
+def combine_docs(docs):
+    return '\n\n'.join([doc.page_content for doc in docs])
