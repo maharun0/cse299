@@ -3,25 +3,34 @@ import faiss
 from langchain_community.vectorstores import FAISS
 from langchain_community.docstore.in_memory import InMemoryDocstore
 
-def createVectorStore():
-    embeddings = OllamaEmbeddings(model="nomic-embed-text")
-    vector = embeddings.embed_query("hello world")
-    print(len(vector));
-    index = faiss.IndexFlatL2(len(vector))
-    
-    vector_store = FAISS(
-        embedding_function=embeddings,
-        index=index, 
-        docstore=InMemoryDocstore(),
-        index_to_docstore_id={},
-    )
-    
-    return vector_store
+def createVectorStore(embed_model):
+    try:
+        embeddings = OllamaEmbeddings(model=embed_model)
+        vector = embeddings.embed_query("hello world")
+        # print(len(vector))
+        index = faiss.IndexFlatL2(len(vector))
+        
+        vector_store = FAISS(
+            embedding_function=embeddings,
+            index=index, 
+            docstore=InMemoryDocstore(),
+            index_to_docstore_id={},
+        )
+        
+        print("Vectore store created")
+        return vector_store
+    except Exception as e:
+        print(f"Error creating vector store: {e}")
 
-def loadVectorStore(db_name):
-    embeddings = OllamaEmbeddings(model="nomic-embed-text")
-    vector_store = FAISS.load_local(db_name, embeddings, allow_dengerous_deserialization=True)
-    return vector_store
+def loadVectorStore(db_name, embed_model):
+    try:
+        embeddings = OllamaEmbeddings(model=embed_model)
+        vector_store = FAISS.load_local(
+            db_name, embeddings, allow_dangerous_deserialization=True)
+        print("Vector store loaded")
+        return vector_store
+    except Exception as e:
+        print(f"Error loading vector store: {e}")
 
 def saveVectoreStore(db_name, vector_store):
     vector_store.save_local(db_name)

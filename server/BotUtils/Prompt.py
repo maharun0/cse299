@@ -28,7 +28,7 @@ def getPrompt():
     3. Generate a concise, logical answer. When generating the answer, Do Not just list your selections, But rearrange them in context so that they become paragraphs with a natural flow. 
     4. When you don't have retrieved context for the question or If you have a retrieved documents, but their content is irrelevant to the question, you should answer 'I can't find the answer to that question in the material I have'.
     5. Use three sentences maximum. Keep the answer concise but logical/natural/in-depth.
-    6. Your full response should provide a friendly vibe. Don't extra line before answering. For example, "Sure, here's the answer to the question" sentences like these. Just go staight to the answer
+    6. Just give the answer. No prefix.
 
     # Question:
     {question}

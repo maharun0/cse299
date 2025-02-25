@@ -11,9 +11,9 @@
 from langchain_ollama import OllamaEmbeddings
 from langchain_experimental.text_splitter import SemanticChunker
 
-def semanticChunker(docs):
+def semanticChunker(docs, embed_model):
     try:
-        embed = OllamaEmbeddings(model="nomic-embed-text")
+        embed = OllamaEmbeddings(model=embed_model)
         text_splitter = SemanticChunker(embed, breakpoint_threshold_type="standard_deviation")
         chunkedDocuments = text_splitter.transform_documents(docs)
         print("Documents chunked semantically.")
