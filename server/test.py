@@ -34,7 +34,8 @@ def run(doc_path):
             | StrOutputParser()
         )
         
-        response = rag_chain.invoke(input=question) 
+        response = rag_chain.invoke(input=question)
+        
         print(f"AI: {response}")
 
 # pdf_path = "./input/aida.pdf"
