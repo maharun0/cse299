@@ -1,1 +1,8 @@
 Created pdfs/ folder
+import os
+
+# Make sure this folder exists in your branch
+pdf_folder = "pdfs"
+
+# List all PDFs in the branch
+print("Files in branch:", os.listdir(pdf_folder))
