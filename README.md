@@ -25,14 +25,14 @@ balance between performance, flexibility, and security.
 - **Reranking for Accuracy** – Combines BM25, cross-encoders, and hybrid retrieval to improve search relevance.  
 - **Adaptive AI Models** – SLMs for speed, LLMs for complex queries, with dynamic selection based on query needs.  
 - **Interactive Conversational Search** – Refines responses with follow-up queries and learns from user feedback.  
-- **Privacy & Security** – Offline mode ensures sensitive data stays on-device, reducing cloud dependencies.  
+- **Privacy & Security** – Offline mode ensures sensitives data stays on-device, reducing cloud dependencies.  
 - **User-Friendly Interface** – Enables seamless document search with conversational interaction.  
 
 This chatbot enhances document-based search with AI-driven conversation, accuracy, and privacy.  
 
 ---
 ## Rag Pipeline
-![Rag Pipeline](./Reports%20and%20Proposals/data/rag_pipeline.png)
+![Rag Pipeline](./Reports/data/rag_pipeline.png)
 
 ## Contributors
 
