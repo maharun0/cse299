@@ -3,3 +3,4 @@
 *.pyc
 *.pyo
 *.pyd
+/server/vector_db
