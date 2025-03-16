@@ -9,15 +9,13 @@ API_BASE_URL = "http://127.0.0.1:8000"  # Ensure this matches your FastAPI backe
 
 # Updated Available LLM Models
 LLM_MODELS = [
+    "qwen2.5:0.5b",
+    "qwen2.5:7b",
+    "gemma3:4b",
     "llama3.1:8b",
-    "nomic-embed-text:latest",
-    "deepseek-r1:8b",
-    "deepseek-r1:1.5b",
-    "gemma:2b",
-    "qwen:0.5b",
-    "codellama:7b-code",
-    "gemma:7b",
     "llama2-uncensored:latest"
+    "deepseek-r1:1.5b",
+    "deepseek-r1:8b",
 ]
 
 # Streamlit App Configurations
