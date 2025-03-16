@@ -4,7 +4,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
 def run(doc_path):
-    vector_db = "physics_db"
+    vector_db = "vector_db/physics_db"
     llm_model = "llama3.1:8b"
     embed_model = "nomic-embed-text"
     
