@@ -25,7 +25,7 @@ def run(doc_path):
     
     while True:
         question=input("User: ")
-        retrieved_docs = retriever.invoke(question)
+        # retrieved_docs = retriever.invoke(question)
         
         rag_chain = (
             { "context": retriever | BotUtils.combine_docs,"question": RunnablePassthrough() }
