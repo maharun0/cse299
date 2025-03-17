@@ -33,17 +33,15 @@ def loadDocument(file_path):
         print("Provided file extraction is not supported yet.")
 
 # PDF
-# from langchain_community.document_loaders import PyPDFLoader
-from langchain_pymupdf4llm import PyMuPDF4LLMLoader
-def loadPDFDocument(file_path):
+from langchain_community.document_loaders import PyPDFLoader
+def loadDocument(file_path):
     try:
-        # loader = PyPDFLoader(file_path, extraction_mode="layout")
-        loader = PyMuPDF4LLMLoader(file_path, mode = "page")
+        loader = PyPDFLoader(file_path)
         docs = loader.load()
         print("Document loaded successfully from file.")
         return docs
     except Exception as e:
-        print(f"Error loading document from PDF: {e}")
+        print(f"Error loading document from file: {e}")
 
 # CSV
 from langchain_community.document_loaders.csv_loader import CSVLoader
