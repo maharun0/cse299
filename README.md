@@ -34,6 +34,41 @@ This chatbot enhances document-based search with AI-driven conversation, accurac
 ## Rag Pipeline
 ![Rag Pipeline](./Reports/data/rag_pipeline.png)
 
+---
+## How to run the Project?
+
+### Prerequisites
+1. **Install Ollama**:
+   - Download and install Ollama from [ollama.com](https://ollama.com/).
+   - Install required models (e.g., `qwen2.5:0.5b`, `nomic-embed-text`):
+     ```bash
+     ollama pull qwen2.5:0.5b
+     ollama pull nomic-embed-text
+     ```
+
+2. **MongoDB Setup**:
+   - Install MongoDB Compass and create a database named `rag_app_db` with a collection `sessions`.
+
+### Install Pacakages
+```
+pip install -r requirements.txt
+```
+  
+### Run Backend
+```
+# Activate python environment
+.venv/Scripts/activate
+
+cd server
+uvicorn main:app --port 8000 --reload --log-level debug
+```
+
+### Run Frontend
+```
+ cd frontend
+ uvicorn main:app --port 8000 --reload --log-level debug
+```
+
 ## Contributors
 
 - **Maharun Afroz** 
