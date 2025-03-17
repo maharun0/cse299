@@ -2,12 +2,16 @@
 """ PDF, PPTX, CSV, etc. -> Documents""" 
 # https://python.langchain.com/docs/concepts/document_loaders/
 
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader,CSVLoader#,PPTXLoader
 
 def loadDocument(file_path):
     try:
         loader = PyPDFLoader(file_path)
         docs = loader.load()
+        csv_loader = CSVLoader(file_path) # type: ignore
+        data = csv_loader.load()
+        #pptx_loader = PPTXLoader(file_path)
+        #pptx_docs = pptx_loader.load()
         print("Document loaded successfully from file.")
         return docs
     except Exception as e:
