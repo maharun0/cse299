@@ -92,21 +92,6 @@ async def get_all_sessions():
         return sessions
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving sessions: {e}")
-
-# Get - A Specific Session
-@app.get("/sessions/{session_id}")
-async def get_session(session_id: str):
-    try:
-        sessions_collection = db["sessions"]
-        session = sessions_collection.find_one({"session_id": session_id})
-        
-        if not session:
-            raise HTTPException(status_code=404, detail="Specified Session not found")
-        
-        session = serialize_mongo_doc(session)
-        return session
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving specific session: {e}")
     
 # Fn - Create a New Session
 def get_or_create_session(session_id: str) -> Dict[str, Any]:
@@ -149,18 +134,6 @@ def update_llm(session_id: str, selected_llm_model: str):
     if state["llm_model"] != selected_llm_model:
         state["llm_model"] = selected_llm_model
         state["LLM"] = ChatOllama(model=selected_llm_model)
-        
-# Fn - Generate session name using a separate LLM instance
-async def generate_session_name(question: str) -> str:
-    name_llm = ChatOllama(model="qwen2.5:0.5b")
-    
-    prompt = f"Generate a descriptive and suitable session name based on this question: {question}"
-    
-    generated_name = await asyncio.get_event_loop().run_in_executor(
-        executor, lambda: name_llm.invoke(input=prompt).content
-    )
-
-    return generated_name.strip()  # Clean up the generated name
 
 # Post - Ask a Question
 @app.post("/ask")
