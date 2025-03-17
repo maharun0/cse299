@@ -97,3 +97,13 @@ def loadMSPPTDocument(file_path):
         return docs
     except Exception as e:
       print(f"Error loading document from MS PowerPoint file: {e}")
+
+      # Markdown
+from langchain_community.document_loaders import UnstructuredMarkdownLoader
+def loadMarkdownDocument(file_path):
+    try:
+        loader = UnstructuredMarkdownLoader(file_path, mode="elements")
+        docs = loader.load()
+        return docs
+    except Exception as e:
+      print(f"Error loading document from Markdown: {e}")

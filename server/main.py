@@ -13,17 +13,17 @@ from langchain_ollama import ChatOllama
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from concurrent.futures import ThreadPoolExecutor
-
+ 
 # Start Ollama
 BotUtils.start_ollama()
-
+ 
 # Global Constants
 EMBED_MODEL = "nomic-embed-text"
 DEFAULT_LLM_MODEL = "qwen2.5:0.5b"
-
+ 
 # Session-specific state dictionary
 session_states: Dict[str, Dict[str, Any]] = {}
-
+ 
 # Helper function to convert MongoDB ObjectId to string recursively
 def serialize_mongo_doc(doc):
     if isinstance(doc, dict):
@@ -34,13 +34,25 @@ def serialize_mongo_doc(doc):
         return str(doc)
     else:
         return doc
-    
-#
-def get_session_state(session_id: str):
-    pass
-
-#
-
+ 
+# Helper to get or initialize session-specific state
+def get_session_state(session_id: str) -> Dict[str, Any]:
+    if session_id not in session_states:
+        session_states[session_id] = {
+            "llm_model": DEFAULT_LLM_MODEL,
+            "LLM": ChatOllama(model=DEFAULT_LLM_MODEL),
+            "VECTOR_STORE": None,
+            "RETRIEVER": None,
+            "RAG_MODE": False
+        }
+    return session_states[session_id]
+ 
+# ✅ Pydantic Model for API Requests
+class QuestionRequest(BaseModel):
+    session_id: str
+    question: str
+    llm_model: str = DEFAULT_LLM_MODEL
+ 
 # Connect to MongoDB
 def connect_to_MongoDB(db_name, uri="mongodb://localhost:27017"):
     """
@@ -60,54 +72,54 @@ def connect_to_MongoDB(db_name, uri="mongodb://localhost:27017"):
         print(f"❌ MongoDB Connection Failed: {e}")
         return None, None
 db, fs = connect_to_MongoDB(db_name="rag_app_db")
-
+ 
 # Initialize FastAPI App
 app = FastAPI()
-
+ 
 # Executor for running blocking calls asynchronously
 executor = ThreadPoolExecutor()
-
+ 
 # Root API Endpoint
 @app.get("/")
 async def root():
     return {"message": "Chatbot backend is running."}
-
+ 
 @app.get("/language_models")
 async def root():
     language_models = BotUtils.getAvailableOllamaLM()
     return {"language_models": language_models} 
-
+ 
 # Get - All Sessions
 @app.get("/sessions")
 async def get_all_sessions():
     try:
         sessions_collection = db["sessions"]
         sessions = list(sessions_collection.find({}))
-        
+ 
         if not sessions:
             return {"message": "No sessions found"}
-        
+ 
         # Serialize all sessions to convert ObjectId instances
         sessions = [serialize_mongo_doc(session) for session in sessions]
         return sessions
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving sessions: {e}")
-
+ 
 # Get - A Specific Session
 @app.get("/sessions/{session_id}")
 async def get_session(session_id: str):
     try:
         sessions_collection = db["sessions"]
         session = sessions_collection.find_one({"session_id": session_id})
-        
+ 
         if not session:
             raise HTTPException(status_code=404, detail="Specified Session not found")
-        
+ 
         session = serialize_mongo_doc(session)
         return session
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving specific session: {e}")
-    
+ 
 # Fn - Create a New Session
 def get_or_create_session(session_id: str) -> Dict[str, Any]:
     sessions_collection = db["sessions"]
@@ -129,7 +141,7 @@ def get_or_create_session(session_id: str) -> Dict[str, Any]:
         return session_data
     session["_id"] = str(session["_id"])
     return session
-
+ 
 # Fn - Update Vector Store and Retriever for a given session state
 def update_vector_store_and_retriever(session_id: str):
     state = get_session_state(session_id)
@@ -142,39 +154,39 @@ def update_vector_store_and_retriever(session_id: str):
         state["RAG_MODE"] = True
         state["VECTOR_STORE"] = BotUtils.loadVectorStore(f"vector_db/{session_id}", EMBED_MODEL)
         state["RETRIEVER"] = BotUtils.getRetriverFromVectorStore(state["VECTOR_STORE"])
-
+ 
 # Fn - Update LLM Model for a given session state
 def update_llm(session_id: str, selected_llm_model: str):
     state = get_session_state(session_id)
     if state["llm_model"] != selected_llm_model:
         state["llm_model"] = selected_llm_model
         state["LLM"] = ChatOllama(model=selected_llm_model)
-        
+ 
 # Fn - Generate session name using a separate LLM instance
 async def generate_session_name(question: str) -> str:
     name_llm = ChatOllama(model="qwen2.5:0.5b")
-    
+ 
     prompt = f"Generate a descriptive and suitable session name based on this question: {question}"
-    
+ 
     generated_name = await asyncio.get_event_loop().run_in_executor(
         executor, lambda: name_llm.invoke(input=prompt).content
     )
-
+ 
     return generated_name.strip()  # Clean up the generated name
-
+ 
 # Post - Ask a Question
 @app.post("/ask")
 async def ask_question(request: QuestionRequest):
     # Get session-specific state
     state = get_session_state(request.session_id)
-    
+ 
     # Get or create the session and check if session_name is None
     session = get_or_create_session(request.session_id)
-    
+ 
     if session["session_name"] is None:
         # Call the function to generate the session name if it's None
         session_name = await generate_session_name(request.question)
-        
+ 
         # Update the session with the generated name
         db["sessions"].update_one(
             {"session_id": request.session_id},
@@ -184,16 +196,16 @@ async def ask_question(request: QuestionRequest):
             },
         )
         session["session_name"] = session_name  # Update session state with the new name
-    
+ 
     # Update LLM and vector store state if needed
     update_llm(request.session_id, request.llm_model)
     update_vector_store_and_retriever(request.session_id)
-    
+ 
     response = None
-
+ 
     # Record the start time
     start_time = datetime.datetime.utcnow()
-
+ 
     if session["files"]["faiss"] is None:
         # Run blocking LLM call in executor if needed
         response = await asyncio.get_event_loop().run_in_executor(
@@ -213,13 +225,13 @@ async def ask_question(request: QuestionRequest):
         response = await asyncio.get_event_loop().run_in_executor(
             executor, lambda: RAG_CHAIN.invoke(input=request.question)
         )
-
+ 
     # Record the end time
     end_time = datetime.datetime.utcnow()
-
+ 
     # Calculate the time taken to generate the response in milliseconds
     time_taken_ms = (end_time - start_time).total_seconds() * 1000  # Convert to milliseconds
-
+ 
     # Store response and time in MongoDB
     try:
         db["sessions"].update_one(
@@ -237,7 +249,7 @@ async def ask_question(request: QuestionRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"MongoDB update failed: {e}")
-
+ 
     return {
         "session_id": request.session_id,
         "response": response,
@@ -246,7 +258,7 @@ async def ask_question(request: QuestionRequest):
         "last_modified_at": datetime.datetime.utcnow(),
         "time_taken_ms": time_taken_ms,  # Include time in the API response as well
     }
-
+ 
 # Post - Upload File
 @app.post("/upload/{session_id}")
 async def upload_file(session_id: str, file: UploadFile = File(...)):
@@ -254,42 +266,42 @@ async def upload_file(session_id: str, file: UploadFile = File(...)):
     upload_dir = "files"
     os.makedirs(upload_dir, exist_ok=True)
     file_path = os.path.join(upload_dir, file.filename)
-    
+ 
     try:
         with open(file_path, "wb") as buffer:
             buffer.write(await file.read())
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save uploaded file: {e}")
-        
+ 
     session = get_or_create_session(session_id)
     state = get_session_state(session_id)
-    
+ 
     if session["files"]["faiss"] is None:
         state["VECTOR_STORE"] = BotUtils.createVectorStore(EMBED_MODEL)
-    
+ 
     docs = BotUtils.loadDocument(file_path)
     chunked_docs = BotUtils.semanticChunker(docs, EMBED_MODEL)
     BotUtils.embedChunksInVectorStore(chunked_docs, state["VECTOR_STORE"])
-    
+ 
     # Save vector store (ensure the function name is correct in BotUtils)
     BotUtils.saveVectoreStore(f"vector_db/{session_id}", state["VECTOR_STORE"])
-    
+ 
     state["RETRIEVER"] = BotUtils.getRetriverFromVectorStore(state["VECTOR_STORE"])
-    
+ 
     # GridFS Storage
     vector_store_path = f"vector_db/{session_id}"
     faiss_path = os.path.join(vector_store_path, "index.faiss")
     pkl_path = os.path.join(vector_store_path, "index.pkl")
-    
+ 
     if not os.path.exists(faiss_path) or not os.path.exists(pkl_path):
         raise HTTPException(status_code=404, detail="Vector store files not found")
-    
+ 
     try:
         with open(faiss_path, "rb") as f:
             faiss_id = fs.put(f, filename="index.faiss")
         with open(pkl_path, "rb") as f:
             pkl_id = fs.put(f, filename="index.pkl")
-    
+ 
         db["sessions"].update_one(
             {"session_id": session_id},
             {
@@ -299,32 +311,31 @@ async def upload_file(session_id: str, file: UploadFile = File(...)):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"MongoDB update failed: {e}")
-    
+ 
     return {"message": "File uploaded and vector store updated successfully"}
-
+ 
 # Post - Delete a Session
 @app.delete("/sessions/{session_id}")
 async def delete_session(session_id: str):
     try:
         # Check if the session exists in the database
         session = db["sessions"].find_one({"session_id": session_id})
-        
+ 
         if not session:
             # If session doesn't exist, return a message without doing anything
             return {"message": f"Session {session_id} does not exist. No action taken."}
-        
+ 
         # Delete the session from MongoDB
         result = db["sessions"].delete_one({"session_id": session_id})
-        
+ 
         # Optionally, delete associated files from GridFS if required
         if session["files"]["faiss"]:
             fs.delete(session["files"]["faiss"])
         if session["files"]["pkl"]:
             fs.delete(session["files"]["pkl"])
-        
+ 
         return {"message": f"Session {session_id} deleted successfully"}
-    
+ 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting session: {e}")
-
-
+ 
