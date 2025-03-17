@@ -78,8 +78,7 @@ def loadJSONDocument(file_path):
         docs = loader.load()
         return docs
     except Exception as e:
-      print(f"Error loading document from JSON: {e}")
-      
+      print(f"Error loading document from JSON: {e}")    
 # MS Word
 from langchain_community.document_loaders import Docx2txtLoader
 def loadMSWordDocument(file_path):
@@ -89,3 +88,12 @@ def loadMSWordDocument(file_path):
         return docs
     except Exception as e:
       print(f"Error loading document from MS Word file: {e}")
+ # MS Powerpoint
+from langchain_community.document_loaders import UnstructuredPowerPointLoader
+def loadMSPPTDocument(file_path):
+    try:
+        loader = UnstructuredPowerPointLoader(file_path)
+        docs = loader.load()
+        return docs
+    except Exception as e:
+      print(f"Error loading document from MS PowerPoint file: {e}")
