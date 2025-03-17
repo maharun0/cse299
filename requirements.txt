@@ -90,7 +90,7 @@ pydantic==2.10.6
 pydantic-settings==2.8.1
 pydantic_core==2.27.2
 pydeck==0.9.1
-pymongo==4.6.1
+pymongo>=4.9,<5.0  # Updated to match motor's requirement
 PyMuPDF==1.25.4
 pymupdf4llm==0.0.17
 pypdf==5.3.1
