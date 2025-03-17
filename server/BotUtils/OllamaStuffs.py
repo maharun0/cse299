@@ -36,5 +36,26 @@ def getAvailableOllamaLM():
     else:
         return f"Error: {response.status_code}"
 
+def stopRunningModel(model_name):
+    """Stops a particular running model."""
+    url = f"http://localhost:11434/api/models/{model_name}/stop"
+    response = requests.post(url)
+ 
+    if response.status_code == 200:
+        print(f"Model {model_name} stopped successfully.")
+    else:
+        print(f"Error stopping model {model_name}: {response.status_code}")
+ 
+def listRunningModels():
+    """Lists the currently running models."""
+    url = "http://localhost:11434/api/models/running"
+    response = requests.get(url)
+ 
+    if response.status_code == 200:
+        running_models = response.json().get("models", [])
+        return [model.get("model_name") for model in running_models]
+    else:
+        return f"Error: {response.status_code}"
+
 if __name__ == "__main__":
     start_ollama()
