@@ -57,7 +57,7 @@ pip install -r requirements.txt
 ### Run Backend
 ```
 # Activate python environment
-.venv/Scripts/activate
+./venv/Scripts/activate
 
 cd server
 uvicorn main:app --port 8000 --reload --log-level debug
