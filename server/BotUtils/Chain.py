@@ -19,3 +19,17 @@ def getRAGChain(vector_db, llm_model, embed_model):
     )
     
     return rag_chain
+
+def getRAGChainWithReranker(state):
+    # Second RAG chain using the state dictionary
+    rag_chain = (
+        {
+            "context": state["RETRIEVER"] | BotUtils.combine_docs,
+            "question": RunnablePassthrough()
+        }
+        | BotUtils.getPrompt()
+        | state["LLM"]
+        | StrOutputParser()
+    )
+
+    return rag_chain

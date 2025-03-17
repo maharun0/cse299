@@ -41,18 +41,72 @@ def get_session_state(session_id: str):
 
 #
 
-###
+# Connect to MongoDB
+def connect_to_MongoDB(db_name, uri="mongodb://localhost:27017"):
+    """
+    Connects to MongoDB and returns the database and GridFS instance.
+    """
+    try:
+        client = pymongo.MongoClient(
+            uri, 
+            serverSelectionTimeoutMS=5000
+        )
+        db = client[db_name]
+        fs = gridfs.GridFS(db)
+        client.server_info()
+        print("✅ Connected to MongoDB")
+        return db, fs
+    except Exception as e:
+        print(f"❌ MongoDB Connection Failed: {e}")
+        return None, None
+db, fs = connect_to_MongoDB(db_name="rag_app_db")
 
 # Initialize FastAPI App
 app = FastAPI()
 
-###
+# Executor for running blocking calls asynchronously
+executor = ThreadPoolExecutor()
 
-###
+# Root API Endpoint
+@app.get("/")
+async def root():
+    return {"message": "Chatbot backend is running."}
 
-###
+@app.get("/language_models")
+async def root():
+    language_models = BotUtils.getAvailableOllamaLM()
+    return {"language_models": language_models} 
 
-## 
+# Get - All Sessions
+@app.get("/sessions")
+async def get_all_sessions():
+    try:
+        sessions_collection = db["sessions"]
+        sessions = list(sessions_collection.find({}))
+        
+        if not sessions:
+            return {"message": "No sessions found"}
+        
+        # Serialize all sessions to convert ObjectId instances
+        sessions = [serialize_mongo_doc(session) for session in sessions]
+        return sessions
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving sessions: {e}")
+
+# Get - A Specific Session
+@app.get("/sessions/{session_id}")
+async def get_session(session_id: str):
+    try:
+        sessions_collection = db["sessions"]
+        session = sessions_collection.find_one({"session_id": session_id})
+        
+        if not session:
+            raise HTTPException(status_code=404, detail="Specified Session not found")
+        
+        session = serialize_mongo_doc(session)
+        return session
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving specific session: {e}")
     
 # Fn - Create a New Session
 def get_or_create_session(session_id: str) -> Dict[str, Any]:
@@ -96,7 +150,17 @@ def update_llm(session_id: str, selected_llm_model: str):
         state["llm_model"] = selected_llm_model
         state["LLM"] = ChatOllama(model=selected_llm_model)
         
-##
+# Fn - Generate session name using a separate LLM instance
+async def generate_session_name(question: str) -> str:
+    name_llm = ChatOllama(model="qwen2.5:0.5b")
+    
+    prompt = f"Generate a descriptive and suitable session name based on this question: {question}"
+    
+    generated_name = await asyncio.get_event_loop().run_in_executor(
+        executor, lambda: name_llm.invoke(input=prompt).content
+    )
+
+    return generated_name.strip()  # Clean up the generated name
 
 # Post - Ask a Question
 @app.post("/ask")
@@ -238,6 +302,29 @@ async def upload_file(session_id: str, file: UploadFile = File(...)):
     
     return {"message": "File uploaded and vector store updated successfully"}
 
-###
+# Post - Delete a Session
+@app.delete("/sessions/{session_id}")
+async def delete_session(session_id: str):
+    try:
+        # Check if the session exists in the database
+        session = db["sessions"].find_one({"session_id": session_id})
+        
+        if not session:
+            # If session doesn't exist, return a message without doing anything
+            return {"message": f"Session {session_id} does not exist. No action taken."}
+        
+        # Delete the session from MongoDB
+        result = db["sessions"].delete_one({"session_id": session_id})
+        
+        # Optionally, delete associated files from GridFS if required
+        if session["files"]["faiss"]:
+            fs.delete(session["files"]["faiss"])
+        if session["files"]["pkl"]:
+            fs.delete(session["files"]["pkl"])
+        
+        return {"message": f"Session {session_id} deleted successfully"}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting session: {e}")
 
 

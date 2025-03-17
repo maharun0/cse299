@@ -44,3 +44,48 @@ def loadPDFDocument(file_path):
         return docs
     except Exception as e:
         print(f"Error loading document from PDF: {e}")
+
+# CSV
+from langchain_community.document_loaders.csv_loader import CSVLoader
+def loadCSVDocument(file_path):
+    try:
+        loader = CSVLoader(file_path=file_path)
+        docs = loader.load()
+        return docs
+    except Exception as e:
+      print(f"Error loading document from CSV: {e}")
+      
+# MS Excel
+from langchain_community.document_loaders import UnstructuredExcelLoader
+def loadMSExcelDocument(file_path):
+    try:
+        loader = UnstructuredExcelLoader(file_path, mode="elements")
+        docs = loader.load()
+        return docs
+    except Exception as e:
+      print(f"Error loading document from MS Excel file: {e}")
+      
+# JSON
+from langchain_community.document_loaders import JSONLoader
+def loadJSONDocument(file_path):
+    try:
+        loader = JSONLoader(
+            file_path=file_path,
+            jq_schema='.messages[].content',
+            text_content=False
+        )
+
+        docs = loader.load()
+        return docs
+    except Exception as e:
+      print(f"Error loading document from JSON: {e}")
+      
+# MS Word
+from langchain_community.document_loaders import Docx2txtLoader
+def loadMSWordDocument(file_path):
+    try:
+        loader = Docx2txtLoader(file_path)
+        docs = loader.load()
+        return docs
+    except Exception as e:
+      print(f"Error loading document from MS Word file: {e}")
