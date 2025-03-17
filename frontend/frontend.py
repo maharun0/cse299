@@ -19,7 +19,7 @@ def image_to_base64(img_path):
 # Streamlit App Configurations
 st.set_page_config(
     page_title="Wingbot",
-    page_icon=image_to_base64("wingbot_avatar.png"),
+    page_icon=image_to_base64("./images/wingbot_avatar.png"),
     layout="wide",
 )
 
