@@ -37,6 +37,3 @@ def getPrompt():
     prompt = ChatPromptTemplate.from_template(prompt)
     # print(prompt)
     return prompt
-
-def getRAGChain():
-    pass
