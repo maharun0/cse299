@@ -73,7 +73,7 @@ def get_display_name(session):
     return session.get('session_name', session['session_id'])
 
 # Show wingbot logo
-text_logo_path = './wingbot_logo_text.png'
+text_logo_path = './images/wingbot_logo_text.png'
 logo = Image.open(text_logo_path)
 # Center the image
 col1, col2, col3 = st.columns([1, 1, 1])
@@ -197,8 +197,8 @@ current_session_display_name = get_display_name(
 )
 
 # Define paths or URLs for your avatar images
-user_avatar = "user_avatar.png"
-assistant_avatar = "wingbot_avatar.png"
+user_avatar = "./images/user_avatar.png"
+assistant_avatar = "./images/wingbot_avatar.png"
 
 # Display chat history with avatars
 chat_container = st.container()
