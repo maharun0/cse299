@@ -190,4 +190,76 @@ if sorted_sessions:
                             st.sidebar.error(f"Failed to delete session (Status code: {response.status_code})")
                     except Exception as e:
                         st.sidebar.error(f"Error deleting session: {str(e)}")
+
+# Display current session in the title and caption
+current_session_display_name = get_display_name(
+    next(session for session in sorted_sessions if session["session_id"] == st.session_state.current_session_id)
+)
+ 
+# Define paths or URLs for your avatar images
+user_avatar = "user_avatar.png"
+assistant_avatar = "wingbot_avatar.png"
+ 
+# Display chat history with avatars
+chat_container = st.container()
+with chat_container:
+    for conv in st.session_state.conversations:
+        with st.chat_message("user", avatar=user_avatar):
+ 
+            st.write(conv["user_input"])
+        with st.chat_message("assistant", avatar=assistant_avatar):
+            st.write(conv["response"])
+ 
+# Chat input field and handling
+if st.session_state.current_session_id:
+    user_question = st.chat_input("Ask a question...")
+    if user_question:
+        with st.chat_message("user", avatar=user_avatar):
+            st.write(user_question)
+        with st.chat_message("assistant", avatar=assistant_avatar):
+            message_placeholder = st.empty()
+            full_response = ""
+            try:
+                payload = {
+                    "session_id": st.session_state.current_session_id,
+                    "question": user_question,
+                    "llm_model": st.session_state.selected_model
+                }
+                with st.spinner("Getting response..."):
+                    response = requests.post(f"{API_BASE_URL}/ask", json=payload)
+                    if response.status_code == 200:
+                        result = response.json()
+                        responses = result["response"]
+                        # Append the new conversation
+                        new_message = {"user_input": user_question, "response": responses}
+                        st.session_state.conversations.append(new_message)
+                        for i, session in enumerate(st.session_state.local_sessions):
+                            if session["session_id"] == st.session_state.current_session_id:
+                                st.session_state.local_sessions[i]["conversation"] = st.session_state.conversations
+                                break
+                        for chunk in responses:
+                            full_response += chunk
+                            message_placeholder.markdown(full_response + "▌")
+                            time.sleep(0.01)
+                        message_placeholder.markdown(full_response)
+                    else:
+                        message_placeholder.error(f"Error from backend (Status code: {response.status_code})")
+            except Exception as e:
+                message_placeholder.error(f"Error: {str(e)}")
+ 
+# Add UI styling for hover effect (glowing container)
+st.markdown("""
+<style>
+    .stButton:hover {
+        background-color: #ff9800 !important;
+        color: white !important;
+        border: 1px solid #ff9800 !important;
+    }
+    .stContainer:hover {
+        background-color: #f0f7fb;
+        box-shadow: 0px 4px 20px rgba(255, 165, 0, 0.5);
+        border-radius: 8px;
+    }
+</style>
+""", unsafe_allow_html=True)
  
