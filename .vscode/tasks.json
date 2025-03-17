@@ -1,0 +1,54 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Frontend (Streamlit)",
+        "type": "shell",
+        "command": "streamlit run slit.py",
+        "options": {
+          "cwd": "${workspaceFolder}/server"
+        },
+        "problemMatcher": [],
+        "group": "none",
+        "presentation": {
+          "panel": "shared",  // Use shared panel
+          "group": "servers",  // Group name
+          "showReuseMessage": false
+        }
+      },
+      {
+        "label": "Server (FastAPI)",
+        "type": "shell",
+        "command": "uvicorn main:app --port 8000 --reload --log-level debug",
+        "options": {
+          "cwd": "${workspaceFolder}/server"
+        },
+        "problemMatcher": [],
+        "group": "none",
+        "presentation": {
+          "panel": "shared",  // Use shared panel
+          "group": "servers",  // Group name
+          "showReuseMessage": false
+        }
+      },
+      {
+        "label": "Run All",
+        "dependsOn": [
+          "Server (FastAPI)",
+          "Frontend (Streamlit)"
+        ],
+        "dependsOrder": "parallel",  // Run in parallel
+        "problemMatcher": [],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared",
+          "group": "servers",
+          "showReuseMessage": false
+        }
+      }
+    ]
+  }
