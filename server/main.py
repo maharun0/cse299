@@ -7,12 +7,13 @@ import BotUtils
 from bson import ObjectId
 from typing import Dict, Any, List
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from langchain_ollama import ChatOllama
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from concurrent.futures import ThreadPoolExecutor
+import logging
  
 # Start Ollama
 BotUtils.start_ollama()
@@ -75,6 +76,7 @@ db, fs = connect_to_MongoDB(db_name="rag_app_db")
  
 # Initialize FastAPI App
 app = FastAPI()
+logging.basicConfig(level=logging.INFO)
  
 # Executor for running blocking calls asynchronously
 executor = ThreadPoolExecutor()
@@ -258,19 +260,23 @@ async def ask_question(request: QuestionRequest):
         "last_modified_at": datetime.datetime.utcnow(),
         "time_taken_ms": time_taken_ms,  # Include time in the API response as well
     }
- 
-# Post - Upload File
+
 @app.post("/upload/{session_id}")
 async def upload_file(session_id: str, file: UploadFile = File(...)):
+    
     # Ensure upload directory exists
     upload_dir = "files"
     os.makedirs(upload_dir, exist_ok=True)
     file_path = os.path.join(upload_dir, file.filename)
+    
+    # logging.Logger.debug(msg="hi2")
  
     try:
         with open(file_path, "wb") as buffer:
             buffer.write(await file.read())
+        # logging.Logger.debug(msg="problem is not here")
     except Exception as e:
+        # logging.Logger.debug(msg="problem is here")
         raise HTTPException(status_code=500, detail=f"Failed to save uploaded file: {e}")
  
     session = get_or_create_session(session_id)
@@ -311,31 +317,31 @@ async def upload_file(session_id: str, file: UploadFile = File(...)):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"MongoDB update failed: {e}")
+
+    return JSONResponse(content={"message": "File uploaded and vector store updated successfully"}, status_code=200)
  
-    return {"message": "File uploaded and vector store updated successfully"}
+# # Post - Delete a Session
+# @app.delete("/sessions/{session_id}")
+# async def delete_session(session_id: str):
+#     try:
+#         # Check if the session exists in the database
+#         session = db["sessions"].find_one({"session_id": session_id})
  
-# Post - Delete a Session
-@app.delete("/sessions/{session_id}")
-async def delete_session(session_id: str):
-    try:
-        # Check if the session exists in the database
-        session = db["sessions"].find_one({"session_id": session_id})
+#         if not session:
+#             # If session doesn't exist, return a message without doing anything
+#             return {"message": f"Session {session_id} does not exist. No action taken."}
  
-        if not session:
-            # If session doesn't exist, return a message without doing anything
-            return {"message": f"Session {session_id} does not exist. No action taken."}
+#         # Delete the session from MongoDB
+#         result = db["sessions"].delete_one({"session_id": session_id})
  
-        # Delete the session from MongoDB
-        result = db["sessions"].delete_one({"session_id": session_id})
+#         # Optionally, delete associated files from GridFS if required
+#         if session["files"]["faiss"]:
+#             fs.delete(session["files"]["faiss"])
+#         if session["files"]["pkl"]:
+#             fs.delete(session["files"]["pkl"])
  
-        # Optionally, delete associated files from GridFS if required
-        if session["files"]["faiss"]:
-            fs.delete(session["files"]["faiss"])
-        if session["files"]["pkl"]:
-            fs.delete(session["files"]["pkl"])
+#         return {"message": f"Session {session_id} deleted successfully"}
  
-        return {"message": f"Session {session_id} deleted successfully"}
- 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error deleting session: {e}")
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Error deleting session: {e}")
  
