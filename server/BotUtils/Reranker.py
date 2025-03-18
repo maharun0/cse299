@@ -31,7 +31,7 @@ def convert_passages_to_docs(passages):
     return documents
 
 # Updated reranker_fn to convert docs to passages, rerank them, and then convert them back to documents
-def reranker(query, docs, choice="Nano"):
+def reranker(query, docs, choice):
     # Convert docs to passages
     passages = convert_docs_to_passages(docs)
     
@@ -51,8 +51,8 @@ def reranker(query, docs, choice="Nano"):
     # Perform the reranking
     results = ranker.rerank(rerankrequest)
     
-    # Print results to inspect the structure
-    print("Results:", results)
+    # # Print results to inspect the structure
+    # print("Results:", results)
     
     # If results are a list, directly return them (assuming passages are the list items)
     if isinstance(results, list):

@@ -1,3 +1,4 @@
+from uuid import uuid4
 from langchain_ollama import OllamaEmbeddings
 import faiss
 from langchain_community.vectorstores import FAISS
@@ -36,14 +37,17 @@ def saveVectoreStore(db_name, vector_store):
     vector_store.save_local(db_name)
 
 def embedChunksInVectorStore(chunkedDocs, vector_store):
-    ids = vector_store.add_documents(documents=chunkedDocs)
-    return vector_store
+    # ids = vector_store.add_documents(documents=chunkedDocs)
+    # return vector_store
+    
+    uuids = [str(uuid4()) for _ in range(len(chunkedDocs))]
+    vector_store.add_documents(documents=chunkedDocs, ids=uuids)
 
 def getRetriverFromVectorStore(vector_store):
      ## Converting vector store as a retriver
     
     retriver = vector_store.as_retriever(search_type="similarity",
-                                        search_kwargs = {'k': 3})
+                                        search_kwargs = {'k': 7})
     
     # retriver = vector_store.as_retriever(search_type="similarity_score_threshold",
     #                                     search_kwargs = {'k': 3, 'score_threshold': 0.1})
