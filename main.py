@@ -1,3 +1,7 @@
+"""
+Starts up Backend, Frontend and MongoDB from one file
+"""
+
 import os
 import subprocess
 import platform
