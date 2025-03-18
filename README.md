@@ -55,8 +55,13 @@ This chatbot enhances document-based search with AI-driven conversation, accurac
 python main.py
 ```
 
-This will start Frontend and Backend
+This will start Frontend, Backend, MongoDb and Ollama.
 
+## Demo
+<video width="400" controls>
+  <source src="Reports/Demo/RAG%20Project%20Demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 
 ## Contributors
