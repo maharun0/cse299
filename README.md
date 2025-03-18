@@ -49,25 +49,15 @@ This chatbot enhances document-based search with AI-driven conversation, accurac
 2. **MongoDB Setup**:
    - Install MongoDB Compass and create a database named `rag_app_db` with a collection `sessions`.
 
-### Install Pacakages
+### Running it
+- From the main directory run following command
 ```
-pip install -r requirements.txt
-```
-  
-### Run Backend
-```
-# Activate python environment
-./venv/Scripts/activate
-
-cd server
-uvicorn main:app --port 8000 --reload --log-level debug
+python main.py
 ```
 
-### Run Frontend
-```
- cd frontend
- uvicorn main:app --port 8000 --reload --log-level debug
-```
+This will start Frontend and Backend
+
+
 
 ## Contributors
 
