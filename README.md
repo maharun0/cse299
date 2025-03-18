@@ -63,6 +63,8 @@ This will start Frontend, Backend, MongoDb and Ollama.
   Your browser does not support the video tag.
 </video>
 
+## Preview
+![image](https://github.com/user-attachments/assets/f7cf3c0e-3b8a-4190-853e-e70ef3a61696)
 
 ## Contributors
 
