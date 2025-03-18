@@ -23,8 +23,6 @@ st.set_page_config(
     layout="wide",
 )
 
-time.sleep(3) # 10 sec
-
 def get_available_llm_models():
     response = requests.get(f"{API_BASE_URL}/language_models")
     
@@ -93,7 +91,6 @@ if st.sidebar.button("New Chat"):
     # Display success message and then hide it after 600ms
     success_message = st.sidebar.empty()
     success_message.success(f"Created new session: {new_session_id}")
-    time.sleep(0.6)
     success_message.empty()
 
 # Automatically create a new session if none exists
@@ -106,7 +103,6 @@ if st.session_state.current_session_id is None:
     # Display success message and then hide it after 600ms
     success_message = st.sidebar.empty()
     success_message.success(f"Created new session: {new_session_id}")
-    time.sleep(0.6)
     success_message.empty()
 
 # Sidebar Model Selection
@@ -169,7 +165,7 @@ if sorted_sessions:
                         if response.status_code == 200:
                             success_message = st.sidebar.empty()
                             success_message.success(f"Deleted session: {session_display_name}")
-                            time.sleep(0.6)
+                            
                             success_message.empty()
 
                             st.session_state.local_sessions = [
@@ -184,7 +180,6 @@ if sorted_sessions:
                             
                             success_message = st.sidebar.empty()
                             success_message.success(f"Created new session: {new_session_id}")
-                            time.sleep(0.6)
                             success_message.empty()
                         else:
                             st.sidebar.error(f"Failed to delete session (Status code: {response.status_code})")
@@ -240,7 +235,6 @@ if st.session_state.current_session_id:
                         for chunk in responses:
                             full_response += chunk
                             message_placeholder.markdown(full_response + "▌")
-                            time.sleep(0.01)
                         message_placeholder.markdown(full_response)
                     else:
                         message_placeholder.error(f"Error from backend (Status code: {response.status_code})")
