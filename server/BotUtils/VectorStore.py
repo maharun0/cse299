@@ -47,7 +47,7 @@ def getRetriverFromVectorStore(vector_store):
      ## Converting vector store as a retriver
     
     retriver = vector_store.as_retriever(search_type="similarity",
-                                        search_kwargs = {'k': 3})
+                                        search_kwargs = {'k': 7})
     
     # retriver = vector_store.as_retriever(search_type="similarity_score_threshold",
     #                                     search_kwargs = {'k': 3, 'score_threshold': 0.1})
