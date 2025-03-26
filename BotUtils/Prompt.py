@@ -65,3 +65,30 @@ def getPromptModified():
  
     prompt = ChatPromptTemplate.from_template(prompt)
     return prompt
+
+def getTestPrompt():
+    prompt = """
+    # Your role
+    You are an expert in understanding the intent behind the question and providing the most optimal answer in a single line from the given documents.
+
+    # Instruction
+    Your task is to answer the question using the following pieces of retrieved context delimited by XML tags.
+
+    <retrieved context>
+    Retrieved Context:
+    {context}
+    </retrieved context>
+
+    # Constraint
+    1. Think deeply about the user's question and ensure you fully understand the intent.
+    2. Choose the most relevant content directly related to the question from the retrieved context and use it to generate a single-line answer.
+    3. Your response should be concise and no longer than one line.
+    4. If no relevant context is found, respond with 'I can't find the answer to that question in the material I have'.
+    5. Just provide the answer. No prefix, no explanation, no extra text.
+
+    # Question:
+    {question}
+    """
+
+    prompt = ChatPromptTemplate.from_template(prompt)
+    return prompt
