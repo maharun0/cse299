@@ -3,7 +3,7 @@ import datetime
 import pymongo
 import gridfs
 import asyncio
-import BotUtils
+from ..BotUtils import BotUtils
 from bson import ObjectId
 from typing import Dict, Any, List
 from fastapi import FastAPI, File, UploadFile, HTTPException

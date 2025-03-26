@@ -1,5 +1,5 @@
 from langchain_ollama import ChatOllama
-import BotUtils
+from ..BotUtils import BotUtils
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
 
