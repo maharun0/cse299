@@ -1,5 +1,10 @@
-from langchain_ollama import ChatOllama
+# Add project root directory to sys.path
+import sys, os
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, project_root)
 import BotUtils
+
+from langchain_ollama import ChatOllama
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_core.output_parsers import StrOutputParser
 

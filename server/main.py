@@ -1,9 +1,14 @@
+# Add project root directory to sys.path
+import sys, os
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, project_root)
+import BotUtils
+
 import os
 import datetime
 import pymongo
 import gridfs
 import asyncio
-import BotUtils
 from bson import ObjectId
 from typing import Dict, Any, List
 from fastapi import FastAPI, File, UploadFile, HTTPException
